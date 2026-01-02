@@ -1,0 +1,1409 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Futuristic Portfolio</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+    }
+    
+    html {
+      scroll-behavior: smooth;
+    }
+    
+    /* Smooth reveal animations */
+    @keyframes reveal {
+      from {
+        opacity: 0;
+        transform: translateY(100px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes float-gentle {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-20px); }
+    }
+    
+    .section {
+      min-height: 100%;
+      opacity: 0;
+      animation: reveal 1s ease-out forwards;
+    }
+    
+    .section:nth-child(1) { animation-delay: 0s; }
+    .section:nth-child(2) { animation-delay: 0.2s; }
+    .section:nth-child(3) { animation-delay: 0.4s; }
+    .section:nth-child(4) { animation-delay: 0.6s; }
+    
+    /* Magnetic button effect */
+    .magnetic-btn {
+      position: relative;
+      transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+      cursor: pointer;
+    }
+    
+    /* 3D Tilt card effect */
+    .tilt-card {
+      transform-style: preserve-3d;
+      transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    
+    .tilt-card-inner {
+      transform: translateZ(50px);
+    }
+    
+    /* Custom cursor */
+    .cursor {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      position: fixed;
+      pointer-events: none;
+      z-index: 99999;
+      mix-blend-mode: difference;
+      transition: width 0.3s, height 0.3s;
+    }
+    
+    .cursor-follower {
+      width: 40px;
+      height: 40px;
+      border: 2px solid;
+      border-radius: 50%;
+      position: fixed;
+      pointer-events: none;
+      z-index: 99998;
+      transition: all 0.15s ease-out;
+    }
+    
+    .cursor.active {
+      width: 30px;
+      height: 30px;
+    }
+    
+    /* Smooth scroll progress */
+    .scroll-indicator {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      z-index: 9999;
+      transition: width 0.1s ease-out;
+    }
+    
+    /* Text reveal on scroll */
+    .text-reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    
+    .text-reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    /* Skill bars with interaction */
+    .skill-item {
+      transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    
+    .skill-item:hover {
+      transform: translateX(20px);
+    }
+    
+    .skill-bar-fill {
+      width: 0;
+      height: 100%;
+      transition: width 1.5s cubic-bezier(0.23, 1, 0.32, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .skill-bar-fill.animate {
+      width: var(--skill-width);
+    }
+    
+    .skill-bar-fill::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      animation: shimmer 2s infinite;
+    }
+    
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(1.1); }
+    }
+    
+    /* Floating animation */
+    .float-avatar {
+      animation: float-gentle 4s ease-in-out infinite;
+    }
+    
+    /* Passion cards with 3D effect */
+    .passion-card {
+      perspective: 1000px;
+      transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    
+    /* Smooth link hover */
+    .smooth-link {
+      position: relative;
+      transition: all 0.3s ease;
+    }
+    
+    .smooth-link::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      transition: width 0.3s ease;
+    }
+    
+    .smooth-link:hover::after {
+      width: 100%;
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full">
+  <div id="app" class="w-full h-full overflow-auto"></div>
+  <script>
+    const defaultConfig = {
+      background_color: "#1a1a2e",
+      card_color: "#2d2d44",
+      text_color: "#d4d4f0",
+      primary_color: "#a8b5ff",
+      accent_color: "#d4a5ff",
+      name: "POOJA CHETTUR",
+      tagline: "Cybersecurity Student • SOC Analyst • Creative Storyteller",
+      bio: "Ambitious cybersecurity student with a strong interest in SOC roles, incident response, and cyber threat analysis. I blend technical expertise with creative expression through poetry, painting, and storytelling — thinking outside the box to solve complex security challenges. ✨",
+      passions_title: "What Drives Me",
+      passion_one_title: "SOC & Incident Response",
+      passion_one_desc: "Building expertise in threat detection, analysis & rapid response",
+      passion_two_title: "Cybersecurity Research",
+      passion_two_desc: "Dark web anonymity, threat intelligence & emerging technologies",
+      passion_three_title: "Creative Expression",
+      passion_three_desc: "Poetry, painting & storytelling — my way of expressing emotions and imagination",
+      passion_four_title: "Community Leadership",
+      passion_four_desc: "Campus ambassador, tech communities & cybersecurity awareness",
+      passion_five_title: "Hands-On Projects",
+      passion_five_desc: "Building real-world apps from weather forecasts to anti-scam tools",
+      skills_title: "Technical Skills",
+      skill_one: "Cybersecurity Fundamentals",
+      skill_two: "Incident Response & SOC",
+      skill_three: "Network Security & Threat Analysis",
+      skill_four: "Python & SQL Basics",
+      contact_title: "Let's Connect",
+      contact_subtitle: "Open for collaborations, internships & cybersecurity opportunities 🔒",
+      font_family: "Space Grotesk",
+      font_size: 16
+    };
+
+    async function onConfigChange(config) {
+      const customFont = config.font_family || defaultConfig.font_family;
+      const baseFontStack = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Courier New", monospace';
+      const fontFamily = `${customFont}, ${baseFontStack}`;
+      const baseSize = config.font_size || defaultConfig.font_size;
+      
+      const backgroundColor = config.background_color || defaultConfig.background_color;
+      const cardColor = config.card_color || defaultConfig.card_color;
+      const textColor = config.text_color || defaultConfig.text_color;
+      const primaryColor = config.primary_color || defaultConfig.primary_color;
+      const accentColor = config.accent_color || defaultConfig.accent_color;
+      
+      const name = config.name || defaultConfig.name;
+      const tagline = config.tagline || defaultConfig.tagline;
+      const bio = config.bio || defaultConfig.bio;
+      const passionsTitle = config.passions_title || defaultConfig.passions_title;
+      const passionOneTitle = config.passion_one_title || defaultConfig.passion_one_title;
+      const passionOneDesc = config.passion_one_desc || defaultConfig.passion_one_desc;
+      const passionTwoTitle = config.passion_two_title || defaultConfig.passion_two_title;
+      const passionTwoDesc = config.passion_two_desc || defaultConfig.passion_two_desc;
+      const passionThreeTitle = config.passion_three_title || defaultConfig.passion_three_title;
+      const passionThreeDesc = config.passion_three_desc || defaultConfig.passion_three_desc;
+      const passionFourTitle = config.passion_four_title || defaultConfig.passion_four_title;
+      const passionFourDesc = config.passion_four_desc || defaultConfig.passion_four_desc;
+      const passionFiveTitle = config.passion_five_title || defaultConfig.passion_five_title;
+      const passionFiveDesc = config.passion_five_desc || defaultConfig.passion_five_desc;
+      const skillsTitle = config.skills_title || defaultConfig.skills_title;
+      const skillOne = config.skill_one || defaultConfig.skill_one;
+      const skillTwo = config.skill_two || defaultConfig.skill_two;
+      const skillThree = config.skill_three || defaultConfig.skill_three;
+      const skillFour = config.skill_four || defaultConfig.skill_four;
+      const contactTitle = config.contact_title || defaultConfig.contact_title;
+      const contactSubtitle = config.contact_subtitle || defaultConfig.contact_subtitle;
+
+      const app = document.getElementById('app');
+      app.style.fontFamily = fontFamily;
+      app.style.backgroundColor = backgroundColor;
+      app.style.color = textColor;
+      
+      app.innerHTML = `
+        <div style="min-height: 100%; position: relative;">
+          <!-- Scroll Progress Bar -->
+          <div class="scroll-indicator" id="scrollProgress" style="background: ${primaryColor};"></div>
+          
+          <!-- Custom Cursors -->
+          <div class="cursor" id="cursor" style="background: ${primaryColor};"></div>
+          <div class="cursor-follower" id="cursorFollower" style="border-color: ${primaryColor};"></div>
+          
+          <!-- Hero Section -->
+          <section class="section" style="min-height: 100%; display: flex; align-items: center; justify-content: center; padding: 4rem 2rem; position: relative; overflow: hidden;">
+            <div style="max-width: 1000px; text-align: center; position: relative; z-index: 10;">
+              <!-- Avatar -->
+              <div class="float-avatar" style="width: 180px; height: 180px; margin: 0 auto 2.5rem; background: ${cardColor}; border: 3px solid ${primaryColor}; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: ${baseSize * 5}px; box-shadow: 0 20px 60px ${primaryColor}40;">
+                🐾
+              </div>
+              
+              <h1 class="text-reveal" style="font-size: ${baseSize * 4.5}px; font-weight: 900; margin-bottom: 1.5rem; color: ${primaryColor}; letter-spacing: 2px; text-transform: uppercase;">
+                ${name}
+              </h1>
+              
+              <p class="text-reveal" style="font-size: ${baseSize * 1.3}px; color: ${accentColor}; margin-bottom: 1.5rem; font-weight: 500; letter-spacing: 1px;">
+                ${tagline}
+              </p>
+              
+              <p class="text-reveal" style="font-size: ${baseSize * 1.1}px; color: ${textColor}; opacity: 0.9; max-width: 700px; margin: 0 auto 3rem; line-height: 1.8;">
+                ${bio}
+              </p>
+              
+              <div class="text-reveal" style="display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap;">
+                <button onclick="showProjectsSection()" class="magnetic-btn" style="background: linear-gradient(135deg, ${primaryColor}, ${accentColor}); color: ${backgroundColor}; font-size: ${baseSize * 1.1}px; font-weight: 700; padding: 1.2rem 3rem; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 10px 30px ${primaryColor}40; text-transform: uppercase; letter-spacing: 1px;">
+                  View Projects
+                </button>
+                <button onclick="scrollToContact()" class="magnetic-btn" style="background: transparent; color: ${primaryColor}; font-size: ${baseSize * 1.1}px; font-weight: 700; padding: 1.2rem 3rem; border: 2px solid ${primaryColor}; border-radius: 8px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px;">
+                  Contact Me
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <!-- Passions Section -->
+          <section class="section" style="padding: 6rem 2rem; background: ${cardColor}; position: relative;">
+            <div style="max-width: 1200px; margin: 0 auto;">
+              <h2 class="text-reveal" style="font-size: ${baseSize * 3}px; font-weight: 800; text-align: center; margin-bottom: 4rem; color: ${primaryColor}; text-transform: uppercase; letter-spacing: 3px;">
+                ${passionsTitle}
+              </h2>
+              
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2.5rem;">
+                <!-- Passion 1 -->
+                <div class="passion-card tilt-card text-reveal" data-tilt onclick="showPassionWorld('soc')" style="background: ${backgroundColor}; padding: 2.5rem; border-radius: 15px; text-align: center; border: 1px solid ${primaryColor}30; cursor: pointer;">
+                  <div class="tilt-card-inner">
+                    <div style="font-size: 3rem; margin-bottom: 1.5rem; transition: transform 0.3s ease;">🛡️</div>
+                    <h3 style="font-size: ${baseSize * 1.5}px; font-weight: 700; color: ${primaryColor}; margin-bottom: 1rem; text-transform: uppercase;">
+                      ${passionOneTitle}
+                    </h3>
+                    <p style="font-size: ${baseSize * 0.95}px; color: ${textColor}; opacity: 0.8; line-height: 1.6;">
+                      ${passionOneDesc}
+                    </p>
+                    <p style="font-size: ${baseSize * 0.85}px; color: ${primaryColor}; margin-top: 1rem; font-weight: 600;">Click to explore →</p>
+                  </div>
+                </div>
+                
+                <!-- Passion 2 -->
+                <div class="passion-card tilt-card text-reveal" data-tilt onclick="showPassionWorld('research')" style="background: ${backgroundColor}; padding: 2.5rem; border-radius: 15px; text-align: center; border: 1px solid ${accentColor}30; cursor: pointer;">
+                  <div class="tilt-card-inner">
+                    <div style="font-size: 3rem; margin-bottom: 1.5rem; transition: transform 0.3s ease;">🔍</div>
+                    <h3 style="font-size: ${baseSize * 1.5}px; font-weight: 700; color: ${accentColor}; margin-bottom: 1rem; text-transform: uppercase;">
+                      ${passionTwoTitle}
+                    </h3>
+                    <p style="font-size: ${baseSize * 0.95}px; color: ${textColor}; opacity: 0.8; line-height: 1.6;">
+                      ${passionTwoDesc}
+                    </p>
+                    <p style="font-size: ${baseSize * 0.85}px; color: ${accentColor}; margin-top: 1rem; font-weight: 600;">Click to explore →</p>
+                  </div>
+                </div>
+                
+                <!-- Passion 3 -->
+                <div class="passion-card tilt-card text-reveal" data-tilt onclick="showPassionWorld('creative')" style="background: ${backgroundColor}; padding: 2.5rem; border-radius: 15px; text-align: center; border: 1px solid ${primaryColor}30; cursor: pointer;">
+                  <div class="tilt-card-inner">
+                    <div style="font-size: 3rem; margin-bottom: 1.5rem; transition: transform 0.3s ease;">🖌️</div>
+                    <h3 style="font-size: ${baseSize * 1.5}px; font-weight: 700; color: ${primaryColor}; margin-bottom: 1rem; text-transform: uppercase;">
+                      ${passionThreeTitle}
+                    </h3>
+                    <p style="font-size: ${baseSize * 0.95}px; color: ${textColor}; opacity: 0.8; line-height: 1.6;">
+                      ${passionThreeDesc}
+                    </p>
+                    <p style="font-size: ${baseSize * 0.85}px; color: ${primaryColor}; margin-top: 1rem; font-weight: 600;">Click to explore →</p>
+                  </div>
+                </div>
+                
+                <!-- Passion 4 -->
+                <div class="passion-card tilt-card text-reveal" data-tilt onclick="showPassionWorld('leadership')" style="background: ${backgroundColor}; padding: 2.5rem; border-radius: 15px; text-align: center; border: 1px solid ${accentColor}30; cursor: pointer;">
+                  <div class="tilt-card-inner">
+                    <div style="font-size: 3rem; margin-bottom: 1.5rem; transition: transform 0.3s ease;">👥</div>
+                    <h3 style="font-size: ${baseSize * 1.5}px; font-weight: 700; color: ${accentColor}; margin-bottom: 1rem; text-transform: uppercase;">
+                      ${passionFourTitle}
+                    </h3>
+                    <p style="font-size: ${baseSize * 0.95}px; color: ${textColor}; opacity: 0.8; line-height: 1.6;">
+                      ${passionFourDesc}
+                    </p>
+                    <p style="font-size: ${baseSize * 0.85}px; color: ${accentColor}; margin-top: 1rem; font-weight: 600;">Click to explore →</p>
+                  </div>
+                </div>
+                
+                <!-- Passion 5 -->
+                <div class="passion-card tilt-card text-reveal" data-tilt onclick="showPassionWorld('projects')" style="background: ${backgroundColor}; padding: 2.5rem; border-radius: 15px; text-align: center; border: 1px solid ${primaryColor}30; cursor: pointer;">
+                  <div class="tilt-card-inner">
+                    <div style="font-size: 3rem; margin-bottom: 1.5rem; transition: transform 0.3s ease;">💻</div>
+                    <h3 style="font-size: ${baseSize * 1.5}px; font-weight: 700; color: ${primaryColor}; margin-bottom: 1rem; text-transform: uppercase;">
+                      ${passionFiveTitle}
+                    </h3>
+                    <p style="font-size: ${baseSize * 0.95}px; color: ${textColor}; opacity: 0.8; line-height: 1.6;">
+                      ${passionFiveDesc}
+                    </p>
+                    <p style="font-size: ${baseSize * 0.85}px; color: ${primaryColor}; margin-top: 1rem; font-weight: 600;">Click to explore →</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Skills Section -->
+          <section class="section" style="padding: 6rem 2rem; background: ${backgroundColor};">
+            <div style="max-width: 1000px; margin: 0 auto;">
+              <h2 class="text-reveal" style="font-size: ${baseSize * 3}px; font-weight: 800; text-align: center; margin-bottom: 4rem; color: ${accentColor}; text-transform: uppercase; letter-spacing: 3px;">
+                ${skillsTitle}
+              </h2>
+              
+              <div style="display: grid; gap: 2rem;">
+                <!-- Skill 1 -->
+                <div class="skill-item text-reveal" style="background: ${cardColor}; padding: 2rem; border-radius: 12px; border-left: 4px solid ${primaryColor};">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 style="font-size: ${baseSize * 1.3}px; font-weight: 700; color: ${textColor};">${skillOne}</h3>
+                    <span style="font-size: ${baseSize * 1.1}px; color: ${primaryColor}; font-weight: 700;">⚡</span>
+                  </div>
+                  <div style="width: 100%; height: 8px; background: ${backgroundColor}; border-radius: 10px; overflow: hidden;">
+                    <div class="skill-bar-fill" style="--skill-width: 90%; background: linear-gradient(90deg, ${primaryColor}, ${accentColor}); border-radius: 10px;"></div>
+                  </div>
+                </div>
+                
+                <!-- Skill 2 -->
+                <div class="skill-item text-reveal" style="background: ${cardColor}; padding: 2rem; border-radius: 12px; border-left: 4px solid ${accentColor};">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 style="font-size: ${baseSize * 1.3}px; font-weight: 700; color: ${textColor};">${skillTwo}</h3>
+                    <span style="font-size: ${baseSize * 1.1}px; color: ${accentColor}; font-weight: 700;">🔒</span>
+                  </div>
+                  <div style="width: 100%; height: 8px; background: ${backgroundColor}; border-radius: 10px; overflow: hidden;">
+                    <div class="skill-bar-fill" style="--skill-width: 85%; background: linear-gradient(90deg, ${accentColor}, ${primaryColor}); border-radius: 10px;"></div>
+                  </div>
+                </div>
+                
+                <!-- Skill 3 -->
+                <div class="skill-item text-reveal" style="background: ${cardColor}; padding: 2rem; border-radius: 12px; border-left: 4px solid ${primaryColor};">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 style="font-size: ${baseSize * 1.3}px; font-weight: 700; color: ${textColor};">${skillThree}</h3>
+                    <span style="font-size: ${baseSize * 1.1}px; color: ${primaryColor}; font-weight: 700;">🌐</span>
+                  </div>
+                  <div style="width: 100%; height: 8px; background: ${backgroundColor}; border-radius: 10px; overflow: hidden;">
+                    <div class="skill-bar-fill" style="--skill-width: 88%; background: linear-gradient(90deg, ${primaryColor}, ${accentColor}); border-radius: 10px;"></div>
+                  </div>
+                </div>
+                
+                <!-- Skill 4 -->
+                <div class="skill-item text-reveal" style="background: ${cardColor}; padding: 2rem; border-radius: 12px; border-left: 4px solid ${accentColor};">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 style="font-size: ${baseSize * 1.3}px; font-weight: 700; color: ${textColor};">${skillFour}</h3>
+                    <span style="font-size: ${baseSize * 1.1}px; color: ${accentColor}; font-weight: 700;">🎯</span>
+                  </div>
+                  <div style="width: 100%; height: 8px; background: ${backgroundColor}; border-radius: 10px; overflow: hidden;">
+                    <div class="skill-bar-fill" style="--skill-width: 92%; background: linear-gradient(90deg, ${accentColor}, ${primaryColor}); border-radius: 10px;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Hobbies & Interests Section -->
+          <section class="section" style="padding: 6rem 2rem; background: ${backgroundColor};">
+            <div style="max-width: 1200px; margin: 0 auto;">
+              <h2 class="text-reveal" style="font-size: ${baseSize * 3}px; font-weight: 800; text-align: center; margin-bottom: 4rem; color: ${accentColor}; text-transform: uppercase; letter-spacing: 3px;">
+                Hobbies & Personal Interests
+              </h2>
+              
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+                <!-- Literature -->
+                <div class="passion-card text-reveal" onclick="showHobbyDetail('literature')" style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 4px solid ${primaryColor}; cursor: pointer; transition: all 0.3s ease;">
+                  <div style="font-size: 3rem; margin-bottom: 1rem;">📚</div>
+                  <h3 style="font-size: ${baseSize * 1.5}px; font-weight: 700; color: ${primaryColor}; margin-bottom: 1rem;">Literature Lover</h3>
+                  <p style="font-size: ${baseSize * 0.95}px; color: ${textColor}; opacity: 0.85; line-height: 1.6;">Poetry, novels, and storytelling fuel my imagination and enhance my communication skills.</p>
+                  <p style="font-size: ${baseSize * 0.85}px; color: ${primaryColor}; margin-top: 1rem; font-weight: 600;">Click to explore →</p>
+                </div>
+                
+                <!-- Animals -->
+                <div class="passion-card text-reveal" onclick="showHobbyDetail('animals')" style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 4px solid ${accentColor}; cursor: pointer; transition: all 0.3s ease;">
+                  <div style="font-size: 3rem; margin-bottom: 1rem;">🐾</div>
+                  <h3 style="font-size: ${baseSize * 1.5}px; font-weight: 700; color: ${accentColor}; margin-bottom: 1rem;">Animal Enthusiast</h3>
+                  <p style="font-size: ${baseSize * 0.95}px; color: ${textColor}; opacity: 0.85; line-height: 1.6;">A deep love for animals and nature. They remind me to observe patterns and stay patient.</p>
+                  <p style="font-size: ${baseSize * 0.85}px; color: ${accentColor}; margin-top: 1rem; font-weight: 600;">Click to explore →</p>
+                </div>
+                
+                <!-- Painting -->
+                <div class="passion-card text-reveal" onclick="showHobbyDetail('painting')" style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 4px solid ${primaryColor}; cursor: pointer; transition: all 0.3s ease;">
+                  <div style="font-size: 3rem; margin-bottom: 1rem;">🎨</div>
+                  <h3 style="font-size: ${baseSize * 1.5}px; font-weight: 700; color: ${primaryColor}; margin-bottom: 1rem;">Painting & Art</h3>
+                  <p style="font-size: ${baseSize * 0.95}px; color: ${textColor}; opacity: 0.85; line-height: 1.6;">Visual expression through colors and forms. Painting sharpens my attention to detail.</p>
+                  <p style="font-size: ${baseSize * 0.85}px; color: ${primaryColor}; margin-top: 1rem; font-weight: 600;">Click to explore →</p>
+                </div>
+                
+                <!-- Music -->
+                <div class="passion-card text-reveal" onclick="showHobbyDetail('music')" style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 4px solid ${accentColor}; cursor: pointer; transition: all 0.3s ease;">
+                  <div style="font-size: 3rem; margin-bottom: 1rem;">🎵</div>
+                  <h3 style="font-size: ${baseSize * 1.5}px; font-weight: 700; color: ${accentColor}; margin-bottom: 1rem;">Music & Rhythm</h3>
+                  <p style="font-size: ${baseSize * 0.95}px; color: ${textColor}; opacity: 0.85; line-height: 1.6;">Music brings balance and focus to my day. The right playlist keeps me in the zone.</p>
+                  <p style="font-size: ${baseSize * 0.85}px; color: ${accentColor}; margin-top: 1rem; font-weight: 600;">Click to explore →</p>
+                </div>
+                
+                <!-- Exploration -->
+                <div class="passion-card text-reveal" onclick="showHobbyDetail('exploration')" style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 4px solid ${primaryColor}; cursor: pointer; transition: all 0.3s ease;">
+                  <div style="font-size: 3rem; margin-bottom: 1rem;">🌍</div>
+                  <h3 style="font-size: ${baseSize * 1.5}px; font-weight: 700; color: ${primaryColor}; margin-bottom: 1rem;">Exploration</h3>
+                  <p style="font-size: ${baseSize * 0.95}px; color: ${textColor}; opacity: 0.85; line-height: 1.6;">Curious about new places, cultures, and experiences. Exploration keeps my mind open.</p>
+                  <p style="font-size: ${baseSize * 0.85}px; color: ${primaryColor}; margin-top: 1rem; font-weight: 600;">Click to explore →</p>
+                </div>
+                
+                <!-- Gaming -->
+                <div class="passion-card text-reveal" onclick="showHobbyDetail('gaming')" style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 4px solid ${accentColor}; cursor: pointer; transition: all 0.3s ease;">
+                  <div style="font-size: 3rem; margin-bottom: 1rem;">🎮</div>
+                  <h3 style="font-size: ${baseSize * 1.5}px; font-weight: 700; color: ${accentColor}; margin-bottom: 1rem;">Gaming</h3>
+                  <p style="font-size: ${baseSize * 0.95}px; color: ${textColor}; opacity: 0.85; line-height: 1.6;">Strategy games and puzzles that challenge my logic and quick decision-making.</p>
+                  <p style="font-size: ${baseSize * 0.85}px; color: ${accentColor}; margin-top: 1rem; font-weight: 600;">Click to explore →</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Experience Section -->
+          <section class="section" style="padding: 6rem 2rem; background: ${cardColor};">
+            <div style="max-width: 1000px; margin: 0 auto;">
+              <h2 class="text-reveal" style="font-size: ${baseSize * 3}px; font-weight: 800; text-align: center; margin-bottom: 4rem; color: ${primaryColor}; text-transform: uppercase; letter-spacing: 3px;">
+                Experience & Leadership
+              </h2>
+              
+              <div style="display: grid; gap: 2rem;">
+                <!-- Campus Ambassador -->
+                <div class="passion-card text-reveal" onclick="showExperienceDetail('ambassador')" style="background: ${backgroundColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${primaryColor}; cursor: pointer; transition: all 0.3s ease;">
+                  <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                      <h3 style="font-size: ${baseSize * 1.6}px; font-weight: 700; color: ${primaryColor};">🎯 Campus Ambassador</h3>
+                      <p style="font-size: ${baseSize * 1.1}px; color: ${accentColor}; font-weight: 600;">White Devils Tech Community</p>
+                    </div>
+                    <span style="font-size: ${baseSize * 0.95}px; color: ${textColor}; opacity: 0.7;">Sep 2025 – Present</span>
+                  </div>
+                  <p style="font-size: ${baseSize * 1}px; color: ${textColor}; opacity: 0.85; line-height: 1.8;">Leading tech community initiatives and organizing cybersecurity awareness programs</p>
+                  <p style="font-size: ${baseSize * 0.85}px; color: ${primaryColor}; margin-top: 1rem; font-weight: 600;">Click to explore →</p>
+                </div>
+                
+                <!-- Internship -->
+                <div class="passion-card text-reveal" onclick="showExperienceDetail('intern')" style="background: ${backgroundColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${accentColor}; cursor: pointer; transition: all 0.3s ease;">
+                  <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                      <h3 style="font-size: ${baseSize * 1.6}px; font-weight: 700; color: ${accentColor};">💼 App Development & Cybersecurity Intern</h3>
+                      <p style="font-size: ${baseSize * 1.1}px; color: ${primaryColor}; font-weight: 600;">Mibot</p>
+                    </div>
+                    <span style="font-size: ${baseSize * 0.95}px; color: ${textColor}; opacity: 0.7;">Jun 2025 – Jul 2025</span>
+                  </div>
+                  <p style="font-size: ${baseSize * 1}px; color: ${textColor}; opacity: 0.85; line-height: 1.8;">Gained hands-on experience in mobile app development and security implementation</p>
+                  <p style="font-size: ${baseSize * 0.85}px; color: ${accentColor}; margin-top: 1rem; font-weight: 600;">Click to explore →</p>
+                </div>
+                
+                <!-- Coming Soon Placeholder -->
+                <div class="text-reveal" style="background: ${backgroundColor}; padding: 3rem; border-radius: 15px; border: 2px dashed ${primaryColor}40; text-align: center;">
+                  <div style="font-size: 3rem; margin-bottom: 1rem; animation: pulse 2s infinite;">⏳</div>
+                  <h3 style="font-size: ${baseSize * 1.4}px; font-weight: 700; color: ${primaryColor}; margin-bottom: 0.5rem;">More Adventures Loading...</h3>
+                  <p style="font-size: ${baseSize * 1}px; color: ${textColor}; opacity: 0.7;">Exciting opportunities brewing 🚀</p>
+                </div>
+                
+                <!-- Languages -->
+                <div class="text-reveal" style="background: ${backgroundColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${primaryColor};">
+                  <div style="margin-bottom: 1rem;">
+                    <h3 style="font-size: ${baseSize * 1.6}px; font-weight: 700; color: ${primaryColor};">🌐 Languages</h3>
+                  </div>
+                  <div style="display: grid; gap: 1.5rem;">
+                    <div>
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span style="font-size: ${baseSize * 1.1}px; color: ${textColor}; font-weight: 600;">English</span>
+                        <span style="font-size: ${baseSize * 0.9}px; color: ${primaryColor};">Fluent</span>
+                      </div>
+                      <div style="width: 100%; height: 6px; background: ${cardColor}; border-radius: 10px; overflow: hidden;">
+                        <div style="width: 95%; height: 100%; background: linear-gradient(90deg, ${primaryColor}, ${accentColor}); border-radius: 10px;"></div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span style="font-size: ${baseSize * 1.1}px; color: ${textColor}; font-weight: 600;">Tamil</span>
+                        <span style="font-size: ${baseSize * 0.9}px; color: ${primaryColor};">Fluent</span>
+                      </div>
+                      <div style="width: 100%; height: 6px; background: ${cardColor}; border-radius: 10px; overflow: hidden;">
+                        <div style="width: 90%; height: 100%; background: linear-gradient(90deg, ${accentColor}, ${primaryColor}); border-radius: 10px;"></div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span style="font-size: ${baseSize * 1.1}px; color: ${textColor}; font-weight: 600;">Malayalam</span>
+                        <span style="font-size: ${baseSize * 0.9}px; color: ${primaryColor};">Native</span>
+                      </div>
+                      <div style="width: 100%; height: 6px; background: ${cardColor}; border-radius: 10px; overflow: hidden;">
+                        <div style="width: 100%; height: 100%; background: linear-gradient(90deg, ${primaryColor}, ${accentColor}); border-radius: 10px;"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Resume Section -->
+          <section class="section" style="padding: 6rem 2rem; background: ${cardColor};">
+            <div style="max-width: 900px; margin: 0 auto; text-align: center;">
+              <h2 class="text-reveal" style="font-size: ${baseSize * 3}px; font-weight: 800; margin-bottom: 2rem; color: ${primaryColor}; text-transform: uppercase; letter-spacing: 3px;">
+                📄 My Resume
+              </h2>
+              <p class="text-reveal" style="font-size: ${baseSize * 1.2}px; color: ${textColor}; opacity: 0.85; margin-bottom: 3rem; line-height: 1.8;">
+                Download or view my complete professional resume with all my experience, projects, and certifications
+              </p>
+              
+              <div style="display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; margin-bottom: 3rem;">
+                <a href="https://drive.google.com/file/d/1B-0kbFxkNMEVeUKB3Fo9VjHLgOhfIdke/view?usp=drivesdk" target="_blank" rel="noopener noreferrer" class="magnetic-btn" style="background: linear-gradient(135deg, ${primaryColor}, ${accentColor}); color: ${backgroundColor}; font-size: ${baseSize * 1.2}px; font-weight: 700; padding: 1.5rem 3rem; border: none; border-radius: 10px; text-decoration: none; display: flex; align-items: center; gap: 1rem; box-shadow: 0 10px 30px ${primaryColor}40; text-transform: uppercase;">
+                  <span style="font-size: ${baseSize * 1.8}px;">📥</span>
+                  Download Resume
+                </a>
+                
+                <a href="https://drive.google.com/file/d/1B-0kbFxkNMEVeUKB3Fo9VjHLgOhfIdke/view?usp=drivesdk" target="_blank" rel="noopener noreferrer" class="magnetic-btn" style="background: transparent; color: ${primaryColor}; font-size: ${baseSize * 1.2}px; font-weight: 700; padding: 1.5rem 3rem; border: 2px solid ${primaryColor}; border-radius: 10px; text-decoration: none; display: flex; align-items: center; gap: 1rem; text-transform: uppercase;">
+                  <span style="font-size: ${baseSize * 1.8}px;">👁️</span>
+                  View Online
+                </a>
+              </div>
+              
+              <div class="text-reveal" style="background: ${backgroundColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${primaryColor};">
+                <h3 style="font-size: ${baseSize * 1.5}px; color: ${primaryColor}; margin-bottom: 1.5rem; font-weight: 700;">Quick Highlights</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; text-align: left;">
+                  <div>
+                    <p style="font-size: ${baseSize * 1.8}px; margin-bottom: 0.5rem;">🎓</p>
+                    <p style="font-size: ${baseSize * 1}px; color: ${textColor}; font-weight: 600;">B.Tech in CSE</p>
+                    <p style="font-size: ${baseSize * 0.9}px; color: ${textColor}; opacity: 0.7;">Cybersecurity Focus</p>
+                  </div>
+                  <div>
+                    <p style="font-size: ${baseSize * 1.8}px; margin-bottom: 0.5rem;">✅</p>
+                    <p style="font-size: ${baseSize * 1}px; color: ${textColor}; font-weight: 600;">8+ Certifications</p>
+                    <p style="font-size: ${baseSize * 0.9}px; color: ${textColor}; opacity: 0.7;">Industry Recognized</p>
+                  </div>
+                  <div>
+                    <p style="font-size: ${baseSize * 1.8}px; margin-bottom: 0.5rem;">💻</p>
+                    <p style="font-size: ${baseSize * 1}px; color: ${textColor}; font-weight: 600;">8+ Projects</p>
+                    <p style="font-size: ${baseSize * 0.9}px; color: ${textColor}; opacity: 0.7;">Real-World Apps</p>
+                  </div>
+                  <div>
+                    <p style="font-size: ${baseSize * 1.8}px; margin-bottom: 0.5rem;">🛡️</p>
+                    <p style="font-size: ${baseSize * 1}px; color: ${textColor}; font-weight: 600;">SOC Focused</p>
+                    <p style="font-size: ${baseSize * 0.9}px; color: ${textColor}; opacity: 0.7;">Security First</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Achievements Section -->
+          <section class="section" style="padding: 6rem 2rem; background: ${backgroundColor};">
+            <div style="max-width: 1200px; margin: 0 auto;">
+              <h2 class="text-reveal" style="font-size: ${baseSize * 3}px; font-weight: 800; text-align: center; margin-bottom: 4rem; color: ${accentColor}; text-transform: uppercase; letter-spacing: 3px;">
+                Achievements & Certifications
+              </h2>
+              
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+                <!-- Articles -->
+                <div class="text-reveal" style="background: ${backgroundColor}; padding: 2rem; border-radius: 15px; border-left: 4px solid ${primaryColor};">
+                  <div style="font-size: 2.5rem; margin-bottom: 1rem;">📰</div>
+                  <h3 style="font-size: ${baseSize * 1.4}px; font-weight: 700; color: ${primaryColor}; margin-bottom: 1rem;">Technical Articles</h3>
+                  <p style="font-size: ${baseSize * 0.95}px; color: ${textColor}; opacity: 0.85; line-height: 1.6;">Published in IEEE Newsletter on cybersecurity and emerging technologies</p>
+                </div>
+                
+                <!-- Workshops -->
+                <div class="text-reveal" style="background: ${backgroundColor}; padding: 2rem; border-radius: 15px; border-left: 4px solid ${accentColor};">
+                  <div style="font-size: 2.5rem; margin-bottom: 1rem;">🎓</div>
+                  <h3 style="font-size: ${baseSize * 1.4}px; font-weight: 700; color: ${accentColor}; margin-bottom: 1rem;">Active Participant</h3>
+                  <p style="font-size: ${baseSize * 0.95}px; color: ${textColor}; opacity: 0.85; line-height: 1.6;">Cybersecurity workshops, symposiums, and awareness programs</p>
+                </div>
+                
+                <!-- Recognition -->
+                <div class="text-reveal" style="background: ${backgroundColor}; padding: 2rem; border-radius: 15px; border-left: 4px solid ${primaryColor};">
+                  <div style="font-size: 2.5rem; margin-bottom: 1rem;">🏆</div>
+                  <h3 style="font-size: ${baseSize * 1.4}px; font-weight: 700; color: ${primaryColor}; margin-bottom: 1rem;">Excellence Award</h3>
+                  <p style="font-size: ${baseSize * 0.95}px; color: ${textColor}; opacity: 0.85; line-height: 1.6;">Recognized for contribution in student tech communities</p>
+                </div>
+                
+                <!-- Top Certifications -->
+                <div class="text-reveal" style="background: ${backgroundColor}; padding: 2rem; border-radius: 15px; border-left: 4px solid ${accentColor};">
+                  <div style="font-size: 2.5rem; margin-bottom: 1rem;">✅</div>
+                  <h3 style="font-size: ${baseSize * 1.4}px; font-weight: 700; color: ${accentColor}; margin-bottom: 1rem;">Incident Response (96%)</h3>
+                  <p style="font-size: ${baseSize * 0.95}px; color: ${textColor}; opacity: 0.85; line-height: 1.6;">Cybersecurity Incident Response Planning & Management - Alison</p>
+                </div>
+                
+                <div class="text-reveal" style="background: ${backgroundColor}; padding: 2rem; border-radius: 15px; border-left: 4px solid ${primaryColor};">
+                  <div style="font-size: 2.5rem; margin-bottom: 1rem;">🌐</div>
+                  <h3 style="font-size: ${baseSize * 1.4}px; font-weight: 700; color: ${primaryColor}; margin-bottom: 1rem;">Dark Web & Cryptocurrency</h3>
+                  <p style="font-size: ${baseSize * 0.95}px; color: ${textColor}; opacity: 0.85; line-height: 1.6;">Introduction to Dark Web, Anonymity & Cryptocurrency - EC-Council</p>
+                </div>
+                
+                <div class="text-reveal" style="background: ${backgroundColor}; padding: 2rem; border-radius: 15px; border-left: 4px solid ${accentColor};">
+                  <div style="font-size: 2.5rem; margin-bottom: 1rem;">🐍</div>
+                  <h3 style="font-size: ${baseSize * 1.4}px; font-weight: 700; color: ${accentColor}; margin-bottom: 1rem;">Python Programming (Elite)</h3>
+                  <p style="font-size: ${baseSize * 0.95}px; color: ${textColor}; opacity: 0.85; line-height: 1.6;">NPTEL - The Joy of Computing Using Python</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Contact Section -->
+          <section class="section" style="padding: 6rem 2rem; background: ${backgroundColor}; position: relative;">
+            <div style="max-width: 800px; margin: 0 auto; text-align: center; position: relative; z-index: 10;">
+              <h2 class="text-reveal" style="font-size: ${baseSize * 3.5}px; font-weight: 900; margin-bottom: 1.5rem; color: ${primaryColor}; text-transform: uppercase; letter-spacing: 2px;">
+                ${contactTitle}
+              </h2>
+              <p class="text-reveal" style="font-size: ${baseSize * 1.2}px; color: ${textColor}; opacity: 0.9; margin-bottom: 3rem;">
+                ${contactSubtitle}
+              </p>
+              
+              <div style="display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap;">
+                <a href="mailto:rockfellarricardo@gmail.com" target="_blank" rel="noopener noreferrer" class="magnetic-btn smooth-link" style="background: linear-gradient(135deg, ${primaryColor}, ${accentColor}); color: ${backgroundColor}; font-size: ${baseSize * 1.1}px; font-weight: 700; padding: 1.5rem 2.5rem; border: none; border-radius: 10px; text-decoration: none; display: flex; align-items: center; gap: 1rem; box-shadow: 0 10px 30px ${primaryColor}40; text-transform: uppercase;">
+                  <span style="font-size: ${baseSize * 1.5}px;">📧</span>
+                  Email
+                </a>
+                
+                <a href="https://www.linkedin.com/in/pooja-chettur-1b8624318" target="_blank" rel="noopener noreferrer" class="magnetic-btn smooth-link" style="background: transparent; color: ${primaryColor}; font-size: ${baseSize * 1.1}px; font-weight: 700; padding: 1.5rem 2.5rem; border: 2px solid ${primaryColor}; border-radius: 10px; text-decoration: none; display: flex; align-items: center; gap: 1rem; text-transform: uppercase;">
+                  <span style="font-size: ${baseSize * 1.5}px;">💼</span>
+                  LinkedIn
+                </a>
+                
+                <a href="https://github.com/PoojaChettur" target="_blank" rel="noopener noreferrer" class="magnetic-btn smooth-link" style="background: transparent; color: ${accentColor}; font-size: ${baseSize * 1.1}px; font-weight: 700; padding: 1.5rem 2.5rem; border: 2px solid ${accentColor}; border-radius: 10px; text-decoration: none; display: flex; align-items: center; gap: 1rem; text-transform: uppercase;">
+                  <span style="font-size: ${baseSize * 1.5}px;">💻</span>
+                  GitHub
+                </a>
+              </div>
+            </div>
+          </section>
+
+          <!-- Footer -->
+          <footer style="background: ${backgroundColor}; padding: 2rem; text-align: center; border-top: 1px solid ${primaryColor}30;">
+            <p style="font-size: ${baseSize * 0.9}px; color: ${textColor}; opacity: 0.6;">
+              Made with 💜 and lots of ☕
+            </p>
+          </footer>
+        </div>
+        
+        <!-- Modal Overlay for Passion Worlds -->
+        <div id="passionModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 100000; overflow-y: auto;">
+          <div style="max-width: 1200px; margin: 4rem auto; padding: 2rem; position: relative;">
+            <button onclick="closePassionModal()" style="position: absolute; top: 1rem; right: 1rem; background: ${primaryColor}; color: ${backgroundColor}; border: none; padding: 1rem 1.5rem; border-radius: 8px; font-size: ${baseSize * 1.2}px; cursor: pointer; font-weight: 700;">✕ Close</button>
+            <div id="passionContent"></div>
+          </div>
+        </div>
+      `;
+    }
+
+    function mapToCapabilities(config) {
+      return {
+        recolorables: [
+          {
+            get: () => config.background_color || defaultConfig.background_color,
+            set: (value) => {
+              config.background_color = value;
+              window.elementSdk.setConfig({ background_color: value });
+            }
+          },
+          {
+            get: () => config.card_color || defaultConfig.card_color,
+            set: (value) => {
+              config.card_color = value;
+              window.elementSdk.setConfig({ card_color: value });
+            }
+          },
+          {
+            get: () => config.text_color || defaultConfig.text_color,
+            set: (value) => {
+              config.text_color = value;
+              window.elementSdk.setConfig({ text_color: value });
+            }
+          },
+          {
+            get: () => config.primary_color || defaultConfig.primary_color,
+            set: (value) => {
+              config.primary_color = value;
+              window.elementSdk.setConfig({ primary_color: value });
+            }
+          },
+          {
+            get: () => config.accent_color || defaultConfig.accent_color,
+            set: (value) => {
+              config.accent_color = value;
+              window.elementSdk.setConfig({ accent_color: value });
+            }
+          }
+        ],
+        borderables: [],
+        fontEditable: {
+          get: () => config.font_family || defaultConfig.font_family,
+          set: (value) => {
+            config.font_family = value;
+            window.elementSdk.setConfig({ font_family: value });
+          }
+        },
+        fontSizeable: {
+          get: () => config.font_size || defaultConfig.font_size,
+          set: (value) => {
+            config.font_size = value;
+            window.elementSdk.setConfig({ font_size: value });
+          }
+        }
+      };
+    }
+
+    function mapToEditPanelValues(config) {
+      return new Map([
+        ["name", config.name || defaultConfig.name],
+        ["tagline", config.tagline || defaultConfig.tagline],
+        ["bio", config.bio || defaultConfig.bio],
+        ["passions_title", config.passions_title || defaultConfig.passions_title],
+        ["passion_one_title", config.passion_one_title || defaultConfig.passion_one_title],
+        ["passion_one_desc", config.passion_one_desc || defaultConfig.passion_one_desc],
+        ["passion_two_title", config.passion_two_title || defaultConfig.passion_two_title],
+        ["passion_two_desc", config.passion_two_desc || defaultConfig.passion_two_desc],
+        ["passion_three_title", config.passion_three_title || defaultConfig.passion_three_title],
+        ["passion_three_desc", config.passion_three_desc || defaultConfig.passion_three_desc],
+        ["passion_four_title", config.passion_four_title || defaultConfig.passion_four_title],
+        ["passion_four_desc", config.passion_four_desc || defaultConfig.passion_four_desc],
+        ["passion_five_title", config.passion_five_title || defaultConfig.passion_five_title],
+        ["passion_five_desc", config.passion_five_desc || defaultConfig.passion_five_desc],
+        ["skills_title", config.skills_title || defaultConfig.skills_title],
+        ["skill_one", config.skill_one || defaultConfig.skill_one],
+        ["skill_two", config.skill_two || defaultConfig.skill_two],
+        ["skill_three", config.skill_three || defaultConfig.skill_three],
+        ["skill_four", config.skill_four || defaultConfig.skill_four],
+        ["contact_title", config.contact_title || defaultConfig.contact_title],
+        ["contact_subtitle", config.contact_subtitle || defaultConfig.contact_subtitle]
+      ]);
+    }
+
+    // Initialize the Element SDK
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities,
+        mapToEditPanelValues
+      });
+    }
+    
+    // Interactive features
+    function initInteractivity() {
+      const cursor = document.getElementById('cursor');
+      const cursorFollower = document.getElementById('cursorFollower');
+      const scrollProgress = document.getElementById('scrollProgress');
+      
+      // Custom cursor
+      if (cursor && cursorFollower) {
+        let mouseX = 0, mouseY = 0;
+        let followerX = 0, followerY = 0;
+        
+        document.addEventListener('mousemove', (e) => {
+          mouseX = e.clientX;
+          mouseY = e.clientY;
+          cursor.style.left = mouseX + 'px';
+          cursor.style.top = mouseY + 'px';
+        });
+        
+        // Smooth follower animation
+        function animateFollower() {
+          const distX = mouseX - followerX;
+          const distY = mouseY - followerY;
+          followerX += distX * 0.1;
+          followerY += distY * 0.1;
+          
+          cursorFollower.style.left = (followerX - 20) + 'px';
+          cursorFollower.style.top = (followerY - 20) + 'px';
+          
+          requestAnimationFrame(animateFollower);
+        }
+        animateFollower();
+        
+        // Cursor interactions
+        const interactiveEls = document.querySelectorAll('button, a, .passion-card, .skill-item');
+        interactiveEls.forEach(el => {
+          el.addEventListener('mouseenter', () => {
+            cursor.classList.add('active');
+          });
+          el.addEventListener('mouseleave', () => {
+            cursor.classList.remove('active');
+          });
+        });
+      }
+      
+      // Scroll progress bar
+      if (scrollProgress) {
+        const appEl = document.getElementById('app');
+        appEl.addEventListener('scroll', () => {
+          const scrollHeight = appEl.scrollHeight - appEl.clientHeight;
+          const scrolled = (appEl.scrollTop / scrollHeight) * 100;
+          scrollProgress.style.width = scrolled + '%';
+        });
+      }
+      
+      // Text reveal on scroll
+      const textRevealEls = document.querySelectorAll('.text-reveal');
+      const observerOptions = {
+        threshold: 0.2,
+        rootMargin: '0px'
+      };
+      
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      }, observerOptions);
+      
+      textRevealEls.forEach(el => observer.observe(el));
+      
+      // 3D tilt effect for passion cards
+      const tiltCards = document.querySelectorAll('[data-tilt]');
+      tiltCards.forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+          const rect = card.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          
+          const centerX = rect.width / 2;
+          const centerY = rect.height / 2;
+          
+          const rotateX = (y - centerY) / 10;
+          const rotateY = (centerX - x) / 10;
+          
+          card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
+        });
+        
+        card.addEventListener('mouseleave', () => {
+          card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale(1)';
+        });
+      });
+      
+      // Magnetic button effect
+      const magneticBtns = document.querySelectorAll('.magnetic-btn');
+      magneticBtns.forEach(btn => {
+        btn.addEventListener('mousemove', (e) => {
+          const rect = btn.getBoundingClientRect();
+          const x = e.clientX - rect.left - rect.width / 2;
+          const y = e.clientY - rect.top - rect.height / 2;
+          
+          btn.style.transform = `translate(${x * 0.3}px, ${y * 0.3}px)`;
+        });
+        
+        btn.addEventListener('mouseleave', () => {
+          btn.style.transform = 'translate(0, 0)';
+        });
+      });
+      
+      // Animate skill bars when visible
+      const skillBars = document.querySelectorAll('.skill-bar-fill');
+      const skillObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('animate');
+          }
+        });
+      }, { threshold: 0.5 });
+      
+      skillBars.forEach(bar => skillObserver.observe(bar));
+    }
+    
+    // Initialize after DOM is ready
+    setTimeout(initInteractivity, 100);
+    
+    // Passion World Navigation
+    window.showPassionWorld = function(world) {
+      const modal = document.getElementById('passionModal');
+      const content = document.getElementById('passionContent');
+      const config = window.elementSdk ? window.elementSdk.config : defaultConfig;
+      const primaryColor = config.primary_color || defaultConfig.primary_color;
+      const accentColor = config.accent_color || defaultConfig.accent_color;
+      const textColor = config.text_color || defaultConfig.text_color;
+      const backgroundColor = config.background_color || defaultConfig.background_color;
+      const cardColor = config.card_color || defaultConfig.card_color;
+      const baseSize = config.font_size || defaultConfig.font_size;
+      
+      let worldContent = '';
+      
+      if (world === 'soc') {
+        worldContent = `
+          <div style="text-align: center; margin-bottom: 3rem;">
+            <div style="font-size: 5rem; margin-bottom: 1rem;">🛡️</div>
+            <h2 style="font-size: ${baseSize * 3}px; color: ${primaryColor}; font-weight: 900; text-transform: uppercase; margin-bottom: 1rem;">SOC & Incident Response World</h2>
+            <p style="font-size: ${baseSize * 1.2}px; color: ${textColor}; opacity: 0.8;">Where security meets rapid response</p>
+          </div>
+          
+          <div style="display: grid; gap: 2rem;">
+            <div style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${primaryColor};">
+              <h3 style="font-size: ${baseSize * 1.8}px; color: ${primaryColor}; margin-bottom: 1rem; font-weight: 700;">What Drives Me</h3>
+              <p style="font-size: ${baseSize * 1.1}px; color: ${textColor}; line-height: 1.8; opacity: 0.9;">I'm passionate about being on the frontlines of cybersecurity - detecting threats before they escalate, analyzing attack patterns, and responding swiftly to incidents. The thrill of threat hunting and protecting organizations keeps me motivated every day.</p>
+            </div>
+            
+            <div style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${accentColor};">
+              <h3 style="font-size: ${baseSize * 1.8}px; color: ${accentColor}; margin-bottom: 1rem; font-weight: 700;">Skills I'm Building</h3>
+              <ul style="font-size: ${baseSize * 1.1}px; color: ${textColor}; line-height: 2; opacity: 0.9; list-style: none; padding: 0;">
+                <li>🔍 Threat Detection & Analysis</li>
+                <li>⚡ Incident Response Procedures</li>
+                <li>📈 SIEM Tools & Log Analysis</li>
+                <li>🎯 Security Event Correlation</li>
+                <li>🔒 Network Traffic Analysis</li>
+              </ul>
+            </div>
+            
+            <div style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${primaryColor};">
+              <h3 style="font-size: ${baseSize * 1.8}px; color: ${primaryColor}; margin-bottom: 1rem; font-weight: 700;">Certifications</h3>
+              <p style="font-size: ${baseSize * 1.1}px; color: ${textColor}; line-height: 1.8; opacity: 0.9;">✅ Cybersecurity Incident Response Planning & Management (96%) - Alison<br>✅ Cybersecurity for Business - Fundamental Edition</p>
+            </div>
+          </div>
+        `;
+      } else if (world === 'research') {
+        worldContent = `
+          <div style="text-align: center; margin-bottom: 3rem;">
+            <div style="font-size: 5rem; margin-bottom: 1rem;">🔍</div>
+            <h2 style="font-size: ${baseSize * 3}px; color: ${accentColor}; font-weight: 900; text-transform: uppercase; margin-bottom: 1rem;">Cybersecurity Research World</h2>
+            <p style="font-size: ${baseSize * 1.2}px; color: ${textColor}; opacity: 0.8;">Exploring the depths of digital security</p>
+          </div>
+          
+          <div style="display: grid; gap: 2rem;">
+            <div style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${accentColor};">
+              <h3 style="font-size: ${baseSize * 1.8}px; color: ${accentColor}; margin-bottom: 1rem; font-weight: 700;">Research Focus</h3>
+              <p style="font-size: ${baseSize * 1.1}px; color: ${textColor}; line-height: 1.8; opacity: 0.9;">I dive deep into emerging cybersecurity threats, dark web operations, cryptocurrency security, and cutting-edge defense technologies. My research helps me stay ahead of evolving attack vectors.</p>
+            </div>
+            
+            <div style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${primaryColor};">
+              <h3 style="font-size: ${baseSize * 1.8}px; color: ${primaryColor}; margin-bottom: 1rem; font-weight: 700;">Published Work</h3>
+              <p style="font-size: ${baseSize * 1.1}px; color: ${textColor}; line-height: 1.8; opacity: 0.9;">📰 Technical articles published in the IEEE Newsletter covering cybersecurity trends and emerging technologies<br><br>🎓 Active participant in cybersecurity workshops and symposiums</p>
+            </div>
+            
+            <div style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${accentColor};">
+              <h3 style="font-size: ${baseSize * 1.8}px; color: ${accentColor}; margin-bottom: 1rem; font-weight: 700;">Specialized Training</h3>
+              <p style="font-size: ${baseSize * 1.1}px; color: ${textColor}; line-height: 1.8; opacity: 0.9;">✅ Introduction to Dark Web, Anonymity & Cryptocurrency - EC-Council<br>✅ Practical Introduction to Cloud Computing - EC-Council</p>
+            </div>
+          </div>
+        `;
+      } else if (world === 'creative') {
+        worldContent = `
+          <div style="text-align: center; margin-bottom: 3rem;">
+            <div style="font-size: 5rem; margin-bottom: 1rem;">🖌️</div>
+            <h2 style="font-size: ${baseSize * 3}px; color: ${primaryColor}; font-weight: 900; text-transform: uppercase; margin-bottom: 1rem;">Creative Expression World</h2>
+            <p style="font-size: ${baseSize * 1.2}px; color: ${textColor}; opacity: 0.8;">Where imagination comes to life</p>
+          </div>
+          
+          <div style="display: grid; gap: 2rem;">
+            <div style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${primaryColor};">
+              <h3 style="font-size: ${baseSize * 1.8}px; color: ${primaryColor}; margin-bottom: 1rem; font-weight: 700;">The Joy of Creating</h3>
+              <p style="font-size: ${baseSize * 1.1}px; color: ${textColor}; line-height: 1.8; opacity: 0.9;">Poetry, painting, and storytelling are my creative outlets - the ways I express myself beyond words and logic. Each form of art lets me capture different parts of my experience. When I write poetry, I'm distilling emotions into verses. When I paint, I'm translating feelings into colors and shapes. When I tell stories, I'm weaving experiences into narratives that connect with others.</p>
+            </div>
+            
+            <div style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${accentColor};">
+              <h3 style="font-size: ${baseSize * 1.8}px; color: ${accentColor}; margin-bottom: 1rem; font-weight: 700;">My Creative Passions</h3>
+              <ul style="font-size: ${baseSize * 1.1}px; color: ${textColor}; line-height: 2; opacity: 0.9; list-style: none; padding: 0;">
+                <li>✍️ Writing poetry that captures fleeting moments</li>
+                <li>🎨 Painting emotions through colors and brushstrokes</li>
+                <li>📖 Crafting stories that resonate with readers</li>
+                <li>💭 Exploring different artistic mediums</li>
+                <li>🌟 Finding beauty in everyday experiences</li>
+              </ul>
+            </div>
+            
+            <div style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${primaryColor};">
+              <h3 style="font-size: ${baseSize * 1.8}px; color: ${primaryColor}; margin-bottom: 1rem; font-weight: 700;">Why It Matters</h3>
+              <p style="font-size: ${baseSize * 1.1}px; color: ${textColor}; line-height: 1.8; opacity: 0.9;">Creative expression keeps me balanced. It's my way of processing emotions, celebrating beauty, and sharing my perspective with the world. These artistic pursuits remind me to stay curious, to see things from different angles, and to appreciate the little details that make life interesting. They're not just hobbies - they're essential parts of who I am.</p>
+            </div>
+          </div>
+        `;
+      } else if (world === 'leadership') {
+        worldContent = `
+          <div style="text-align: center; margin-bottom: 3rem;">
+            <div style="font-size: 5rem; margin-bottom: 1rem;">👥</div>
+            <h2 style="font-size: ${baseSize * 3}px; color: ${accentColor}; font-weight: 900; text-transform: uppercase; margin-bottom: 1rem;">Community Leadership World</h2>
+            <p style="font-size: ${baseSize * 1.2}px; color: ${textColor}; opacity: 0.8;">Building bridges in tech communities</p>
+          </div>
+          
+          <div style="display: grid; gap: 2rem;">
+            <div style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${accentColor};">
+              <h3 style="font-size: ${baseSize * 1.8}px; color: ${accentColor}; margin-bottom: 1rem; font-weight: 700;">Campus Ambassador Role</h3>
+              <p style="font-size: ${baseSize * 1.1}px; color: ${textColor}; line-height: 1.8; opacity: 0.9;">🎯 White Devils Tech Community (September 2025 – Present)<br><br>Leading initiatives, organizing events, and fostering a collaborative tech community. This role has honed my leadership, communication, and organizational skills.</p>
+            </div>
+            
+            <div style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${primaryColor};">
+              <h3 style="font-size: ${baseSize * 1.8}px; color: ${primaryColor}; margin-bottom: 1rem; font-weight: 700;">Community Impact</h3>
+              <ul style="font-size: ${baseSize * 1.1}px; color: ${textColor}; line-height: 2; opacity: 0.9; list-style: none; padding: 0;">
+                <li>📢 Cybersecurity awareness programs</li>
+                <li>🤝 Mentoring fellow students</li>
+                <li>🎓 Workshop organization & coordination</li>
+                <li>💬 Tech talks and knowledge sharing</li>
+                <li>🌟 Building inclusive tech spaces</li>
+              </ul>
+            </div>
+            
+            <div style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${accentColor};">
+              <h3 style="font-size: ${baseSize * 1.8}px; color: ${accentColor}; margin-bottom: 1rem; font-weight: 700;">Recognition</h3>
+              <p style="font-size: ${baseSize * 1.1}px; color: ${textColor}; line-height: 1.8; opacity: 0.9;">🏆 Recognized for contribution and excellence in student tech communities<br><br>Making a difference one initiative at a time.</p>
+            </div>
+          </div>
+        `;
+      } else if (world === 'projects') {
+        worldContent = `
+          <div style="text-align: center; margin-bottom: 3rem;">
+            <div style="font-size: 5rem; margin-bottom: 1rem;">💻</div>
+            <h2 style="font-size: ${baseSize * 3}px; color: ${primaryColor}; font-weight: 900; text-transform: uppercase; margin-bottom: 1rem;">Projects Portfolio</h2>
+            <p style="font-size: ${baseSize * 1.2}px; color: ${textColor}; opacity: 0.8;">Building real-world solutions</p>
+          </div>
+          
+          <div style="display: grid; gap: 2rem;">
+            <div style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${primaryColor};">
+              <h3 style="font-size: ${baseSize * 1.8}px; color: ${primaryColor}; margin-bottom: 1rem; font-weight: 700;">🌤️ RAIN-OR-SHINE</h3>
+              <p style="font-size: ${baseSize * 1.1}px; color: ${textColor}; line-height: 1.8; opacity: 0.9;">Weather forecast app with dynamic outfit/activity suggestions based on weather conditions. Built with HTML, CSS, and interactive JavaScript logic. Live on GitHub!</p>
+            </div>
+            
+            <div style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${accentColor};">
+              <h3 style="font-size: ${baseSize * 1.8}px; color: ${accentColor}; margin-bottom: 1rem; font-weight: 700;">👻 GHOST OF PAYMENTS</h3>
+              <p style="font-size: ${baseSize * 1.1}px; color: ${textColor}; line-height: 1.8; opacity: 0.9;">Security-focused app that helps identify scam IDs, phishing attempts, and other financial scams. Making every payment protected with ease - cybersecurity meets fintech!</p>
+            </div>
+            
+            <div style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${primaryColor};">
+              <h3 style="font-size: ${baseSize * 1.8}px; color: ${primaryColor}; margin-bottom: 1rem; font-weight: 700;">🤝 HUMRAH</h3>
+              <p style="font-size: ${baseSize * 1.1}px; color: ${textColor}; line-height: 1.8; opacity: 0.9;">Civic engagement platform connecting civilians directly to government. Features complaint raising, status tracking, area problem snippets, multilingual support, and voice/photo reporting for inclusive access.</p>
+            </div>
+            
+            <div style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${accentColor};">
+              <h3 style="font-size: ${baseSize * 1.8}px; color: ${accentColor}; margin-bottom: 1rem; font-weight: 700;">🎯 SAFFRON</h3>
+              <p style="font-size: ${baseSize * 1.1}px; color: ${textColor}; line-height: 1.8; opacity: 0.9;">Bot tracker application featuring step-by-step user documentation and logic validation. Clean architecture and user-focused design.</p>
+            </div>
+            
+            <div style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${primaryColor};">
+              <h3 style="font-size: ${baseSize * 1.8}px; color: ${primaryColor}; margin-bottom: 1rem; font-weight: 700;">✅ PRODUCTIVITY</h3>
+              <p style="font-size: ${baseSize * 1.1}px; color: ${textColor}; line-height: 1.8; opacity: 0.9;">Task organizer that categorizes workloads by urgency with visual analytics and enhanced UI. Smart priority management for busy students and professionals.</p>
+            </div>
+            
+            <div style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${accentColor};">
+              <h3 style="font-size: ${baseSize * 1.8}px; color: ${accentColor}; margin-bottom: 1rem; font-weight: 700;">💌 WILL-YOU-ATTEND</h3>
+              <p style="font-size: ${baseSize * 1.1}px; color: ${textColor}; line-height: 1.8; opacity: 0.9;">Interactive invitation generator with live countdown timer and location integration. Focused on delivering an exceptional user experience.</p>
+            </div>
+            
+            <div style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${primaryColor};">
+              <h3 style="font-size: ${baseSize * 1.8}px; color: ${primaryColor}; margin-bottom: 1rem; font-weight: 700;">🚀 ELIXIR</h3>
+              <p style="font-size: ${baseSize * 1.1}px; color: ${textColor}; line-height: 1.8; opacity: 0.9;">Modern website created to launch a new project. Clean design, smooth animations, and engaging user interactions.</p>
+            </div>
+            
+            <div style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${accentColor};">
+              <h3 style="font-size: ${baseSize * 1.8}px; color: ${accentColor}; margin-bottom: 1rem; font-weight: 700;">🎮 TIC TAC TOE</h3>
+              <p style="font-size: ${baseSize * 1.1}px; color: ${textColor}; line-height: 1.8; opacity: 0.9;">Traditional tic-tac-toe game filled with cybersecurity questions. Give your brain a ride while having fun - gamification meets education!</p>
+            </div>
+          </div>
+        `;
+      }
+      
+      content.innerHTML = worldContent;
+      modal.style.display = 'block';
+      document.body.style.overflow = 'hidden';
+    };
+    
+    window.closePassionModal = function() {
+      const modal = document.getElementById('passionModal');
+      modal.style.display = 'none';
+      document.body.style.overflow = 'auto';
+    };
+    
+    window.showHobbyDetail = function(hobby) {
+      const modal = document.getElementById('passionModal');
+      const content = document.getElementById('passionContent');
+      const config = window.elementSdk ? window.elementSdk.config : defaultConfig;
+      const primaryColor = config.primary_color || defaultConfig.primary_color;
+      const accentColor = config.accent_color || defaultConfig.accent_color;
+      const textColor = config.text_color || defaultConfig.text_color;
+      const cardColor = config.card_color || defaultConfig.card_color;
+      const baseSize = config.font_size || defaultConfig.font_size;
+      
+      let hobbyContent = '';
+      
+      if (hobby === 'literature') {
+        hobbyContent = `
+          <div style="text-align: center; margin-bottom: 3rem;">
+            <div style="font-size: 5rem; margin-bottom: 1rem;">📚</div>
+            <h2 style="font-size: ${baseSize * 3}px; color: ${primaryColor}; font-weight: 900; text-transform: uppercase; margin-bottom: 1rem;">Literature & Storytelling</h2>
+            <p style="font-size: ${baseSize * 1.2}px; color: ${textColor}; opacity: 0.8;">My escape into worlds of words</p>
+          </div>
+          
+          <div style="display: grid; gap: 2rem;">
+            <div style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${primaryColor};">
+              <h3 style="font-size: ${baseSize * 1.8}px; color: ${primaryColor}; margin-bottom: 1rem; font-weight: 700;">Why I Love Reading</h3>
+              <p style="font-size: ${baseSize * 1.1}px; color: ${textColor}; line-height: 1.8; opacity: 0.9;">Books are my sanctuary. There's something magical about getting lost in a story, living through characters' experiences, and traveling to places I've never been - all from the comfort of my favorite reading spot. Whether it's fiction that takes me on wild adventures, poetry that captures emotions I can't quite express, or novels that make me see the world differently, reading is pure joy for me. Every book opens a new door to understanding life, people, and myself better.</p>
+            </div>
+            
+            <div style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${accentColor};">
+              <h3 style="font-size: ${baseSize * 1.8}px; color: ${accentColor}; margin-bottom: 1rem; font-weight: 700;">Writing Poetry & Stories</h3>
+              <p style="font-size: ${baseSize * 1.1}px; color: ${textColor}; line-height: 1.8; opacity: 0.9;">Writing is how I process the world around me. When I write poetry, I can capture fleeting emotions and moments that would otherwise slip away. There's something deeply satisfying about finding the perfect words to express a feeling, crafting a metaphor that just clicks, or telling a story that moves someone. Writing gives me a voice - it lets me share my thoughts, dreams, and perspectives in ways that conversation sometimes can't. It's therapeutic, creative, and endlessly fulfilling.</p>
+            </div>
+            
+            <div style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${primaryColor};">
+              <h3 style="font-size: ${baseSize * 1.8}px; color: ${primaryColor}; margin-bottom: 1rem; font-weight: 700;">What It Means to Me</h3>
+              <p style="font-size: ${baseSize * 1.1}px; color: ${textColor}; line-height: 1.8; opacity: 0.9;">Literature isn't just a hobby - it's a part of who I am. Reading teaches me empathy by letting me walk in someone else's shoes. Writing helps me understand my own thoughts and feelings better. Both give me a sense of peace and purpose. Whether I'm curled up with a good book on a rainy day or scribbling verses in my journal at midnight, these moments with words are when I feel most myself. Literature feeds my soul and keeps my imagination alive.</p>
+            </div>
+          </div>
+        `;
+      } else if (hobby === 'animals') {
+        hobbyContent = `
+          <div style="text-align: center; margin-bottom: 3rem;">
+            <div style="font-size: 5rem; margin-bottom: 1rem;">🐾</div>
+            <h2 style="font-size: ${baseSize * 3}px; color: ${accentColor}; font-weight: 900; text-transform: uppercase; margin-bottom: 1rem;">Animal Enthusiast</h2>
+            <p style="font-size: ${baseSize * 1.2}px; color: ${textColor}; opacity: 0.8;">A deep connection with nature</p>
+          </div>
+          
+          <div style="display: grid; gap: 2rem;">
+            <div style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${accentColor};">
+              <h3 style="font-size: ${baseSize * 1.8}px; color: ${accentColor}; margin-bottom: 1rem; font-weight: 700;">Why I Love Animals</h3>
+              <p style="font-size: ${baseSize * 1.1}px; color: ${textColor}; line-height: 1.8; opacity: 0.9;">Animals bring me pure joy and peace. There's something incredibly grounding about spending time with them - whether it's watching birds in flight, playing with a curious cat, or simply observing wildlife in their natural habitat. They live so authentically, without pretense or complexity, and that honesty is refreshing. Every animal has its own personality, quirks, and way of seeing the world, and I find that endlessly fascinating.</p>
+            </div>
+            
+            <div style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${primaryColor};">
+              <h3 style="font-size: ${baseSize * 1.8}px; color: ${primaryColor}; margin-bottom: 1rem; font-weight: 700;">What They Teach Me</h3>
+              <p style="font-size: ${baseSize * 1.1}px; color: ${textColor}; line-height: 1.8; opacity: 0.9;">Animals remind me to slow down and be present. They teach me patience - you can't rush building trust with an animal. They show me the importance of non-verbal communication and reading subtle cues. Watching them adapt to their environments, solve problems in their own unique ways, and care for each other gives me a different perspective on life. They're living reminders that there's beauty in simplicity and wisdom in instinct.</p>
+            </div>
+            
+            <div style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${accentColor};">
+              <h3 style="font-size: ${baseSize * 1.8}px; color: ${accentColor}; margin-bottom: 1rem; font-weight: 700;">My Favorites</h3>
+              <p style="font-size: ${baseSize * 1.1}px; color: ${textColor}; line-height: 1.8; opacity: 0.9;">I'm drawn to all kinds of animals - from the intelligence of dogs and the independence of cats, to the grace of horses and the playfulness of dolphins. I love learning about animal behavior, their ecosystems, and conservation efforts. Nature documentaries are my guilty pleasure, and visiting wildlife sanctuaries is always a highlight of my day.</p>
+            </div>
+          </div>
+        `;
+      } else if (hobby === 'painting') {
+        hobbyContent = `
+          <div style="text-align: center; margin-bottom: 3rem;">
+            <div style="font-size: 5rem; margin-bottom: 1rem;">🎨</div>
+            <h2 style="font-size: ${baseSize * 3}px; color: ${primaryColor}; font-weight: 900; text-transform: uppercase; margin-bottom: 1rem;">Painting & Visual Art</h2>
+            <p style="font-size: ${baseSize * 1.2}px; color: ${textColor}; opacity: 0.8;">Colors, forms, and creative expression</p>
+          </div>
+          
+          <div style="display: grid; gap: 2rem;">
+            <div style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${primaryColor};">
+              <h3 style="font-size: ${baseSize * 1.8}px; color: ${primaryColor}; margin-bottom: 1rem; font-weight: 700;">Why I Paint</h3>
+              <p style="font-size: ${baseSize * 1.1}px; color: ${textColor}; line-height: 1.8; opacity: 0.9;">Painting is my meditation, my therapy, and my joy all rolled into one. There's something deeply satisfying about transforming a blank canvas into something beautiful with just colors and brushstrokes. I love the feeling of paint on canvas, the way colors blend and interact, and how light and shadow can create depth and emotion. Each painting is a journey - sometimes planned, sometimes spontaneous, but always deeply personal.</p>
+            </div>
+            
+            <div style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${accentColor};">
+              <h3 style="font-size: ${baseSize * 1.8}px; color: ${accentColor}; margin-bottom: 1rem; font-weight: 700;">My Artistic Style</h3>
+              <p style="font-size: ${baseSize * 1.1}px; color: ${textColor}; line-height: 1.8; opacity: 0.9;">I experiment with different styles - from abstract expressionism where emotions flow freely onto canvas, to realistic landscapes where I try to capture nature's beauty. I'm drawn to vibrant colors and bold compositions, but I also love the subtlety of watercolors and the drama of acrylics. Painting allows me to express feelings that words can't capture, to freeze moments in time, and to create something that didn't exist before.</p>
+            </div>
+            
+            <div style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${primaryColor};">
+              <h3 style="font-size: ${baseSize * 1.8}px; color: ${primaryColor}; margin-bottom: 1rem; font-weight: 700;">The Joy of Creating</h3>
+              <p style="font-size: ${baseSize * 1.1}px; color: ${textColor}; line-height: 1.8; opacity: 0.9;">Every time I pick up a brush, I enter a flow state where time disappears and it's just me and the canvas. Painting teaches me patience - you can't rush a masterpiece. It teaches me to see beauty in imperfections and to embrace happy accidents. It's a reminder that creation is a process, and sometimes the journey is more important than the destination.</p>
+            </div>
+          </div>
+        `;
+      } else if (hobby === 'music') {
+        hobbyContent = `
+          <div style="text-align: center; margin-bottom: 3rem;">
+            <div style="font-size: 5rem; margin-bottom: 1rem;">🎵</div>
+            <h2 style="font-size: ${baseSize * 3}px; color: ${accentColor}; font-weight: 900; text-transform: uppercase; margin-bottom: 1rem;">Music & Rhythm</h2>
+            <p style="font-size: ${baseSize * 1.2}px; color: ${textColor}; opacity: 0.8;">The universal language</p>
+          </div>
+          
+          <div style="display: grid; gap: 2rem;">
+            <div style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${accentColor};">
+              <h3 style="font-size: ${baseSize * 1.8}px; color: ${accentColor}; margin-bottom: 1rem; font-weight: 700;">My Relationship with Music</h3>
+              <p style="font-size: ${baseSize * 1.1}px; color: ${textColor}; line-height: 1.8; opacity: 0.9;">Music is my constant companion - it's there in my happiest moments and comforts me during tough times. I can't imagine a day without music. Whether it's the energy of upbeat pop, the depth of classical compositions, the soul of blues, or the raw emotion of indie rock, every genre speaks to a different part of me. Music has this incredible power to transport me to different emotional spaces instantly.</p>
+            </div>
+            
+            <div style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${primaryColor};">
+              <h3 style="font-size: ${baseSize * 1.8}px; color: ${primaryColor}; margin-bottom: 1rem; font-weight: 700;">More Than Just Listening</h3>
+              <p style="font-size: ${baseSize * 1.1}px; color: ${textColor}; line-height: 1.8; opacity: 0.9;">I love discovering new artists, analyzing lyrics, and understanding the stories behind songs. Creating playlists for different moods is like crafting emotional journeys. I'm fascinated by how melodies are constructed, how harmonies work together, and how a single chord progression can evoke such powerful feelings. Sometimes I lose hours just exploring music from different cultures and eras, appreciating the diversity of human expression through sound.</p>
+            </div>
+            
+            <div style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${accentColor};">
+              <h3 style="font-size: ${baseSize * 1.8}px; color: ${accentColor}; margin-bottom: 1rem; font-weight: 700;">What Music Gives Me</h3>
+              <p style="font-size: ${baseSize * 1.1}px; color: ${textColor}; line-height: 1.8; opacity: 0.9;">Music brings joy, healing, and energy to my life. It helps me process emotions, lifts my spirits when I'm down, and amplifies my happiness when things are good. It's my stress reliever, my motivation, and my celebration all at once. A good song can change my entire day, and the right playlist can make any task more enjoyable.</p>
+            </div>
+          </div>
+        `;
+      } else if (hobby === 'exploration') {
+        hobbyContent = `
+          <div style="text-align: center; margin-bottom: 3rem;">
+            <div style="font-size: 5rem; margin-bottom: 1rem;">🌍</div>
+            <h2 style="font-size: ${baseSize * 3}px; color: ${primaryColor}; font-weight: 900; text-transform: uppercase; margin-bottom: 1rem;">Exploration & Discovery</h2>
+            <p style="font-size: ${baseSize * 1.2}px; color: ${textColor}; opacity: 0.8;">Wanderlust and wonder</p>
+          </div>
+          
+          <div style="display: grid; gap: 2rem;">
+            <div style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${primaryColor};">
+              <h3 style="font-size: ${baseSize * 1.8}px; color: ${primaryColor}; margin-bottom: 1rem; font-weight: 700;">Why I Love Exploring</h3>
+              <p style="font-size: ${baseSize * 1.1}px; color: ${textColor}; line-height: 1.8; opacity: 0.9;">I have an insatiable curiosity about the world - how people live in different places, what stories different cultures tell, what landscapes exist beyond my hometown. Exploring new places, whether it's a hidden café in my city or a mountain trail I've never hiked, fills me with excitement and wonder. Every new place teaches me something, shows me a different way of seeing the world, and reminds me how vast and diverse our planet is.</p>
+            </div>
+            
+            <div style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${accentColor};">
+              <h3 style="font-size: ${baseSize * 1.8}px; color: ${accentColor}; margin-bottom: 1rem; font-weight: 700;">The Joy of Discovery</h3>
+              <p style="font-size: ${baseSize * 1.1}px; color: ${textColor}; line-height: 1.8; opacity: 0.9;">There's nothing quite like the thrill of discovering something new - a breathtaking view, a fascinating historical site, or a unique local tradition. I love meeting people with different perspectives, trying new foods, and experiencing cultures different from my own. Exploration opens my mind, challenges my assumptions, and constantly reminds me that there's always more to learn and discover.</p>
+            </div>
+            
+            <div style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${primaryColor};">
+              <h3 style="font-size: ${baseSize * 1.8}px; color: ${primaryColor}; margin-bottom: 1rem; font-weight: 700;">My Approach to Adventure</h3>
+              <p style="font-size: ${baseSize * 1.1}px; color: ${textColor}; line-height: 1.8; opacity: 0.9;">I believe that exploration isn't just about traveling far - it's about maintaining curiosity and openness to new experiences wherever you are. Whether I'm wandering through my own city with fresh eyes or planning my next big adventure, the spirit of exploration keeps life exciting and full of possibilities. Every journey, big or small, becomes a story worth telling.</p>
+            </div>
+          </div>
+        `;
+      } else if (hobby === 'gaming') {
+        hobbyContent = `
+          <div style="text-align: center; margin-bottom: 3rem;">
+            <div style="font-size: 5rem; margin-bottom: 1rem;">🎮</div>
+            <h2 style="font-size: ${baseSize * 3}px; color: ${accentColor}; font-weight: 900; text-transform: uppercase; margin-bottom: 1rem;">Gaming & Strategy</h2>
+            <p style="font-size: ${baseSize * 1.2}px; color: ${textColor}; opacity: 0.8;">Fun, challenge, and adventure</p>
+          </div>
+          
+          <div style="display: grid; gap: 2rem;">
+            <div style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${accentColor};">
+              <h3 style="font-size: ${baseSize * 1.8}px; color: ${accentColor}; margin-bottom: 1rem; font-weight: 700;">Why I Game</h3>
+              <p style="font-size: ${baseSize * 1.1}px; color: ${textColor}; line-height: 1.8; opacity: 0.9;">Gaming is my escape, my challenge, and my fun all wrapped into one. I love the immersion of diving into different worlds, taking on new identities, and experiencing stories that games tell. Whether it's solving intricate puzzles, strategizing in competitive matches, or exploring vast open worlds, gaming offers endless entertainment and excitement. There's something incredibly satisfying about mastering a difficult level or finally solving that puzzle that's been bugging me for hours.</p>
+            </div>
+            
+            <div style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${primaryColor};">
+              <h3 style="font-size: ${baseSize * 1.8}px; color: ${primaryColor}; margin-bottom: 1rem; font-weight: 700;">My Gaming Style</h3>
+              <p style="font-size: ${baseSize * 1.1}px; color: ${textColor}; line-height: 1.8; opacity: 0.9;">I'm drawn to strategy games that make me think ahead, puzzle games that test my logic, and story-driven adventures that pull me into their narratives. I love the challenge of competitive gaming but also enjoy the relaxation of casual games. Gaming with friends creates amazing memories and inside jokes that last forever. The social aspect - whether it's co-op campaigns or friendly competition - adds another layer of enjoyment.</p>
+            </div>
+            
+            <div style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${accentColor};">
+              <h3 style="font-size: ${baseSize * 1.8}px; color: ${accentColor}; margin-bottom: 1rem; font-weight: 700;">What Gaming Brings Me</h3>
+              <p style="font-size: ${baseSize * 1.1}px; color: ${textColor}; line-height: 1.8; opacity: 0.9;">Gaming is my way to unwind after a long day, challenge myself when I need mental stimulation, and connect with friends across distances. It's taught me resilience - you learn to handle failure and try again. It's shown me creativity - the worlds that game designers build are truly artistic. And it's given me countless hours of joy, laughter, and unforgettable experiences.</p>
+            </div>
+          </div>
+        `;
+      }
+      
+      content.innerHTML = hobbyContent;
+      modal.style.display = 'block';
+      document.body.style.overflow = 'hidden';
+    };
+    
+    window.showExperienceDetail = function(experience) {
+      const modal = document.getElementById('passionModal');
+      const content = document.getElementById('passionContent');
+      const config = window.elementSdk ? window.elementSdk.config : defaultConfig;
+      const primaryColor = config.primary_color || defaultConfig.primary_color;
+      const accentColor = config.accent_color || defaultConfig.accent_color;
+      const textColor = config.text_color || defaultConfig.text_color;
+      const cardColor = config.card_color || defaultConfig.card_color;
+      const baseSize = config.font_size || defaultConfig.font_size;
+      
+      let expContent = '';
+      
+      if (experience === 'ambassador') {
+        expContent = `
+          <div style="text-align: center; margin-bottom: 3rem;">
+            <div style="font-size: 5rem; margin-bottom: 1rem;">🎯</div>
+            <h2 style="font-size: ${baseSize * 3}px; color: ${primaryColor}; font-weight: 900; text-transform: uppercase; margin-bottom: 1rem;">Campus Ambassador</h2>
+            <p style="font-size: ${baseSize * 1.2}px; color: ${accentColor}; font-weight: 600; margin-bottom: 0.5rem;">White Devils Tech Community</p>
+            <p style="font-size: ${baseSize * 1}px; color: ${textColor}; opacity: 0.7;">September 2025 – Present</p>
+          </div>
+          
+          <div style="display: grid; gap: 2rem;">
+            <div style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${primaryColor};">
+              <h3 style="font-size: ${baseSize * 1.8}px; color: ${primaryColor}; margin-bottom: 1rem; font-weight: 700;">Role & Responsibilities</h3>
+              <ul style="font-size: ${baseSize * 1.1}px; color: ${textColor}; line-height: 2; opacity: 0.9; list-style: none; padding: 0;">
+                <li>✓ Leading tech community initiatives and organizing cybersecurity awareness programs</li>
+                <li>✓ Mentoring students and coordinating workshops on emerging technologies</li>
+                <li>✓ Building inclusive tech spaces and fostering collaborative learning</li>
+                <li>✓ Organizing events, meetups, and technical sessions</li>
+                <li>✓ Bridging the gap between students and industry professionals</li>
+              </ul>
+            </div>
+            
+            <div style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${accentColor};">
+              <h3 style="font-size: ${baseSize * 1.8}px; color: ${accentColor}; margin-bottom: 1rem; font-weight: 700;">Impact & Growth</h3>
+              <p style="font-size: ${baseSize * 1.1}px; color: ${textColor}; line-height: 1.8; opacity: 0.9;">This role has honed my leadership, communication, and organizational skills. I've learned to inspire others, manage teams, and create meaningful tech experiences for the community.</p>
+            </div>
+            
+            <div style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${primaryColor};">
+              <h3 style="font-size: ${baseSize * 1.8}px; color: ${primaryColor}; margin-bottom: 1rem; font-weight: 700;">Recognition</h3>
+              <p style="font-size: ${baseSize * 1.1}px; color: ${textColor}; line-height: 1.8; opacity: 0.9;">🏆 Recognized for contribution and excellence in student tech communities</p>
+            </div>
+          </div>
+        `;
+      } else if (experience === 'intern') {
+        expContent = `
+          <div style="text-align: center; margin-bottom: 3rem;">
+            <div style="font-size: 5rem; margin-bottom: 1rem;">💼</div>
+            <h2 style="font-size: ${baseSize * 3}px; color: ${accentColor}; font-weight: 900; text-transform: uppercase; margin-bottom: 1rem;">App Development & Cybersecurity Intern</h2>
+            <p style="font-size: ${baseSize * 1.2}px; color: ${primaryColor}; font-weight: 600; margin-bottom: 0.5rem;">Mibot</p>
+            <p style="font-size: ${baseSize * 1}px; color: ${textColor}; opacity: 0.7;">June 2025 – July 2025</p>
+          </div>
+          
+          <div style="display: grid; gap: 2rem;">
+            <div style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${accentColor};">
+              <h3 style="font-size: ${baseSize * 1.8}px; color: ${accentColor}; margin-bottom: 1rem; font-weight: 700;">Learning & Growing</h3>
+              <p style="font-size: ${baseSize * 1.1}px; color: ${textColor}; line-height: 1.8; opacity: 0.9;">Gained valuable hands-on experience in mobile application development and implementing security best practices. This internship helped me bridge the gap between development and security, understanding how to build secure applications from the ground up.</p>
+            </div>
+            
+            <div style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${primaryColor};">
+              <h3 style="font-size: ${baseSize * 1.8}px; color: ${primaryColor}; margin-bottom: 1rem; font-weight: 700;">Key Focus Areas</h3>
+              <ul style="font-size: ${baseSize * 1.1}px; color: ${textColor}; line-height: 2; opacity: 0.9; list-style: none; padding: 0;">
+                <li>📱 Mobile application development</li>
+                <li>🔐 Security implementation in apps</li>
+                <li>🛡️ Secure coding practices</li>
+                <li>🔍 Vulnerability assessment</li>
+                <li>📝 Technical documentation</li>
+              </ul>
+            </div>
+            
+            <div style="background: ${cardColor}; padding: 2.5rem; border-radius: 15px; border-left: 5px solid ${accentColor};">
+              <h3 style="font-size: ${baseSize * 1.8}px; color: ${accentColor}; margin-bottom: 1rem; font-weight: 700;">Skills Development</h3>
+              <p style="font-size: ${baseSize * 1.1}px; color: ${textColor}; line-height: 1.8; opacity: 0.9;">Built practical expertise in developing secure applications while understanding cybersecurity principles. Learned how to integrate security measures throughout the development lifecycle and create user-friendly apps with robust protection!</p>
+            </div>
+          </div>
+        `;
+      }
+      
+      content.innerHTML = expContent;
+      modal.style.display = 'block';
+      document.body.style.overflow = 'hidden';
+    };
+    
+    window.showProjectsSection = function() {
+      showPassionWorld('projects');
+    };
+    
+    window.scrollToContact = function() {
+      const contactSection = document.querySelector('section:last-of-type');
+      if (contactSection) {
+        contactSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    };
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b7c18baa1a77f8b',t:'MTc2NzM3NjIwNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
